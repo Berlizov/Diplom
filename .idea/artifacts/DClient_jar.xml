@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="DClient:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/DClient_jar</output-path>
+    <root id="archive" name="DClient.jar">
+      <element id="module-output" name="DClient" />
+      <element id="library" level="project" name="DServer" />
+    </root>
+  </artifact>
+</component>
