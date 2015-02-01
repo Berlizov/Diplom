@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="DServer">
-    <CLASSES>
-      <root url="file://$PROJECT_DIR$/../DServer/out/production/DServer" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

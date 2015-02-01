@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/DClient.iml" filepath="$PROJECT_DIR$/DClient.iml" />
+      <module fileurl="file://$PROJECT_DIR$/DiplomL.iml" filepath="$PROJECT_DIR$/DiplomL.iml" />
     </modules>
   </component>
 </project>
-
