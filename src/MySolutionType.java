@@ -30,9 +30,6 @@ class MySolutionType extends SolutionType {
                 v.add(task);
                 totalCost += task.getCost();
             }
-            /*for (int var = 0; var < problem_.getNumberOfVariables(); var++) {
-				variables[var] = new MyVar(0, 150,var+t*problem_.getNumberOfVariables());
-			}*/
         }
         return v.toArray(new Variable[v.size()]);
     }

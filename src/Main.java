@@ -48,7 +48,7 @@ class Main extends JFrame implements Printer{
                 try {
                     graphPanel.setExtraTasksSets(d((Integer) limitSpinner.getValue()));
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                   print(ex.getMessage()+"\n");
                 }
             }
         });
@@ -59,10 +59,15 @@ class Main extends JFrame implements Printer{
         genButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                print("----------------\n");
-                generate((Integer) taskSpinner.getValue());
-                for (Task task : tasks) {
-                    print(task.toString());
+                try {
+                    print("----------------\n");
+                    generate((Integer) taskSpinner.getValue());
+                    for (Task task : tasks) {
+                        print(task.toString());
+                    }
+                }
+                catch (Exception ex){
+                    print(ex.getMessage()+"\n");
                 }
             }
         });
@@ -76,16 +81,6 @@ class Main extends JFrame implements Printer{
         TextArea.setRows(5);
         scrollPane.setViewportView(TextArea);
 
-        GroupLayout jPanel1Layout = new GroupLayout(graphPanel);
-        graphPanel.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-                jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGap(0, 316, Short.MAX_VALUE)
-        );
-        jPanel1Layout.setVerticalGroup(
-                jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                        .addGap(0, 0, Short.MAX_VALUE)
-        );
 
         GroupLayout layout = new GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -160,9 +155,9 @@ class Main extends JFrame implements Printer{
             graphPanel.setExtraTasksSets(d(maxC));
         }
         catch (Exception e){
-            e.printStackTrace();
+            print(e.getMessage()+"\n");
         }
-        print("Полный перебор: "+(System.currentTimeMillis() - startTime)+"ms\n");
+        print("Полный перебор: "+(System.currentTimeMillis() - startTime)+"ms Кол-во сочетаний - "+taskPermutation.size()+"\n");
     }
 
     void permutation(ArrayList<TasksSet> taskPermutation, TasksSet a, int pos, int maxUsed, int k) {
@@ -198,7 +193,7 @@ class Main extends JFrame implements Printer{
         algorithm.addOperator("mutation", mutation);
 
         SolutionSet population = algorithm.execute();
-        //  population.printVariablesToFile("VAR");
+        //population.printVariablesToFile("VAR");
         ArrayList<TasksSet> extraTaskSet = new ArrayList<TasksSet>();
         for (int i = 0; i < population.size(); i++) {
 
@@ -211,11 +206,9 @@ class Main extends JFrame implements Printer{
         }
         print("Вычисление фронта: "+(System.currentTimeMillis() - startTime)+"ms\n");
 
-
         graphPanel.setExtraTasksSets(extraTaskSet);
         graphPanel.repaint();
-
-        //  population.printObjectivesToFile("FUN");
+       // population.printObjectivesToFile("FUN");
 
         return extraTaskSet;
     }
