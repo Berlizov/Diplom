@@ -8,5 +8,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="jmetal" level="project" />
+    <orderEntry type="library" name="org.abego.treelayout.netbeans" level="project" />
   </component>
 </module>

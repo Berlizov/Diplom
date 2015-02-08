@@ -19,40 +19,55 @@ import java.util.Random;
 /**
  * Created by Eugene Berlizov on 20.01.2015.
  */
-class Main extends JFrame implements Printer{
+class Main extends JFrame implements Printer, OrderViewDelegate {
+    private JFrame frame;
+    private OrderView ov;
     private Task[] tasks;
     private GraphView graphPanel;
     private JSpinner taskSpinner;
     private JTextArea TextArea;
     private JSpinner limitSpinner;
+    private JSpinner populationSpinner;
 
     public static void main(String[] args) {
         Main m = new Main();
         m.initComponents();
     }
 
-    private JSpinner populationSpinner;
+    @Override
+    public void orderChanged() {
+        graphPanel.repaint();
+        calcParetoFront();
+    }
+    public void calcParetoFront(){
+        try {
+            graphPanel.setExtraTasksSets(d((Integer) limitSpinner.getValue()));
+        } catch (Exception ex) {
+            print(ex.getMessage() + "\n");
+        }
+    }
+
     private void initComponents() {
         JButton genButton = new JButton();
+        JButton openTreeButton = new JButton();
         JLabel taskLabel = new JLabel();
+        JTextArea TextArea1 = new JTextArea();
         taskSpinner = new JSpinner();
         JLabel populationLabel = new JLabel();
         populationSpinner = new JSpinner();
         JScrollPane scrollPane = new JScrollPane();
+        JScrollPane scrollPane1 = new JScrollPane();
         TextArea = new JTextArea();
         graphPanel = new GraphView();
         limitSpinner = new JSpinner();
         limitSpinner.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                try {
-                    graphPanel.setExtraTasksSets(d((Integer) limitSpinner.getValue()));
-                } catch (Exception ex) {
-                   print(ex.getMessage()+"\n");
-                }
+                calcParetoFront();
             }
         });
         graphPanel.setSpinner(limitSpinner);
+        graphPanel.setTextArea(TextArea1);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         genButton.setText("Сгенерировать");
@@ -65,9 +80,38 @@ class Main extends JFrame implements Printer{
                     for (Task task : tasks) {
                         print(task.toString());
                     }
+                    permutation();
+                    graphPanel.repaint();
+                    orderInit();
+                } catch (Exception ex) {
+                    print(ex.getMessage() + "\n");
                 }
-                catch (Exception ex){
-                    print(ex.getMessage()+"\n");
+            }
+        });
+        ov = new OrderView();
+        ov.addDelegate(this);
+        openTreeButton.setText("открыть дерево");
+        openTreeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (tasks != null) {
+                    if (frame != null) {
+                        frame.setVisible(false);
+                        frame = null;
+                    }
+                    frame = new JFrame();
+                    JButton button=new JButton("Раставить");
+                    button.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            ov.autoLayout();
+                        }
+                    });
+                    frame.add(ov, java.awt.BorderLayout.CENTER);
+                    frame.add(button, java.awt.BorderLayout.PAGE_END);
+                    frame.setSize(400, 400);
+                    frame.setVisible(true);
+                    orderInit();
                 }
             }
         });
@@ -80,10 +124,10 @@ class Main extends JFrame implements Printer{
         TextArea.setColumns(20);
         TextArea.setRows(5);
         scrollPane.setViewportView(TextArea);
-
+        scrollPane1.setViewportView(TextArea1);
 
         GroupLayout layout = new GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
+        setLayout(layout);
         graphPanel.setPrinter(this);
         layout.setHorizontalGroup(
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
@@ -103,8 +147,11 @@ class Main extends JFrame implements Printer{
                                                 .addComponent(populationSpinner, GroupLayout.PREFERRED_SIZE, 73, GroupLayout.PREFERRED_SIZE)))
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
 
-                                .addComponent(graphPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(limitSpinner, GroupLayout.PREFERRED_SIZE, 45, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(graphPanel, GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
+                                        .addComponent(scrollPane1, GroupLayout.PREFERRED_SIZE, 45, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(limitSpinner, GroupLayout.PREFERRED_SIZE, 45, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(openTreeButton, GroupLayout.PREFERRED_SIZE, 45, GroupLayout.PREFERRED_SIZE))
                                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -121,14 +168,25 @@ class Main extends JFrame implements Printer{
                                                                 .addComponent(populationSpinner, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                                                         .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                                         .addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-
-                                                .addComponent(limitSpinner, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                .addComponent(graphPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addGroup(layout.createSequentialGroup()
+                                                        .addComponent(limitSpinner, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(openTreeButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(scrollPane1, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                                .addComponent(graphPanel, GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
                                 )
                                 .addContainerGap())
         );
         pack();
         setVisible(true);
+    }
+
+    private void orderInit() {
+        ov.clear();
+        for (Task task : tasks) {
+            ov.addTask(task);
+        }
+        ov.generateRelations();
+        ov.autoLayout();
     }
 
     void generate(int tasksCount) {
@@ -137,7 +195,12 @@ class Main extends JFrame implements Printer{
         for (int i = 0; i < tasksCount; i++) {
             tasks[i] = new Task(i + 1, r.nextInt(10), r.nextInt(10));
         }
-        permutation();
+        for (int i = 0; i < tasksCount; i++) {
+            int relCount = r.nextInt(tasksCount / 2);
+            for (int j = 0; j < relCount; j++) {
+                tasks[i].addParentTask(tasks[r.nextInt(tasksCount)]);
+            }
+        }
     }
 
     void permutation() {
@@ -151,13 +214,8 @@ class Main extends JFrame implements Printer{
         int maxC = taskPermutation.get(taskPermutation.size() - 1).getCost();
         graphPanel.setMaxValue(maxC, maxV);
         graphPanel.setTasksSets(taskPermutation);
-        try {
-            graphPanel.setExtraTasksSets(d(maxC));
-        }
-        catch (Exception e){
-            print(e.getMessage()+"\n");
-        }
-        print("Полный перебор: "+(System.currentTimeMillis() - startTime)+"ms Кол-во сочетаний - "+taskPermutation.size()+"\n");
+        calcParetoFront();
+        print("Полный перебор: " + (System.currentTimeMillis() - startTime) + "ms Кол-во сочетаний - " + taskPermutation.size() + "\n");
     }
 
     void permutation(ArrayList<TasksSet> taskPermutation, TasksSet a, int pos, int maxUsed, int k) {
@@ -204,15 +262,16 @@ class Main extends JFrame implements Printer{
             }
             extraTaskSet.add(ts);
         }
-        print("Вычисление фронта: "+(System.currentTimeMillis() - startTime)+"ms\n");
+        print("Вычисление фронта: " + (System.currentTimeMillis() - startTime) + "ms\n");
 
         graphPanel.setExtraTasksSets(extraTaskSet);
-        graphPanel.repaint();
-       // population.printObjectivesToFile("FUN");
+
+        // population.printObjectivesToFile("FUN");
 
         return extraTaskSet;
     }
-    public void print(String str){
+
+    public void print(String str) {
         TextArea.append(str);
     }
 

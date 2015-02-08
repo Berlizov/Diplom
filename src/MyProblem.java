@@ -3,6 +3,7 @@ import jmetal.core.Solution;
 import jmetal.util.JMException;
 
 import java.util.Arrays;
+
 /**
  * Created by Eugene Berlizov on 20.01.2015.
  */

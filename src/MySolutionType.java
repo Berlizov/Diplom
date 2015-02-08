@@ -2,6 +2,7 @@ import jmetal.core.SolutionType;
 import jmetal.core.Variable;
 
 import java.util.Random;
+
 /**
  * Created by Eugene Berlizov on 21.01.2015.
  */
@@ -19,7 +20,7 @@ class MySolutionType extends SolutionType {
         Random r = new Random();
         Task task;
         int margin = 0;
-        int maxCost=r.nextInt(problem_.getNumberOfVariables())+1;
+        int maxCost = r.nextInt(problem_.getNumberOfVariables()) + 1;
         for (int j = 0; j < problem_.getNumberOfVariables() * 2 && totalCost <= problem_.getNumberOfVariables() - margin; j++) {
             task = tasks[r.nextInt(tasks.length)];
             if (v.contains(task)) {
@@ -27,10 +28,13 @@ class MySolutionType extends SolutionType {
             }
 
             if (totalCost + task.getCost() <= maxCost) {
-                v.add(task);
-                totalCost += task.getCost();
+                if(v.can(task)) {
+                    v.add(task);
+                    totalCost += task.getCost();
+                }
             }
         }
+
         return v.toArray(new Variable[v.size()]);
     }
 }

@@ -28,6 +28,18 @@ class TasksSet extends ArrayList<Task> {
         return V;
     }
 
+    public static boolean can(TasksSet ts) {
+        for (Task task : ts) {
+            ArrayList<Task> t = task.getParents();
+            for (Task task1 : ts) {
+                t.remove(task1);
+            }
+            if (t.size() > 0)
+                return false;
+        }
+        return true;
+    }
+
     public int getCost() {
         int Cost = 0;
         for (Task task : this) {
@@ -48,7 +60,7 @@ class TasksSet extends ArrayList<Task> {
     public String toString() {
         String s = "";
         for (Task task : this) {
-            s += task.getId() + " ";
+            s += task.getId() + "\n";
         }
         return s;
     }
@@ -61,5 +73,15 @@ class TasksSet extends ArrayList<Task> {
         } else {
             return super.set(index, task);
         }
+    }
+
+    public boolean can() {
+        return can(this);
+    }
+
+    public boolean can(Task task) {
+        TasksSet ts = new TasksSet(this);
+        ts.add(task);
+        return can(ts);
     }
 }
